@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -81,6 +82,11 @@ func (ah *ArticleHandler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !validDate(newArticle.Date) {
+		handleErrorResponse(w, r, internal.NewErrorf(internal.ErrorCodeInvalidArgument, "invalid date format"))
+		return
+	}
+
 	err = ah.svc.Create(service.CreateArticleInput{
 		ID:    newArticle.ID,
 		Title: newArticle.Title,
@@ -92,4 +98,10 @@ func (ah *ArticleHandler) create(w http.ResponseWriter, r *http.Request) {
 		handleErrorResponse(w, r, err)
 		return
 	}
+}
+
+func validDate(date string) bool {
+	dateRegex := `\d{4}-\d{2}-\d{2}`
+	match, _ := regexp.MatchString(dateRegex, date)
+	return match
 }
