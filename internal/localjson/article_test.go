@@ -68,6 +68,20 @@ func (suite *RepoTestSuite) TestCreate() {
 	assert.Error(suite.T(), err)
 }
 
+func (suite *RepoTestSuite) TestGetByDate() {
+	repo := NewArticleRepository(suite.Filepath)
+	date := "2020-01-01"
+	articles, err := repo.GetByDate(date)
+	assert.NoError(suite.T(), err)
+	assert.Len(suite.T(), articles, 1)
+
+	// should not error out if nothing found
+	date = "2021-01-01"
+	articles, err = repo.GetByDate(date)
+	assert.NoError(suite.T(), err)
+	assert.Len(suite.T(), articles, 0)
+}
+
 func TestRepoTestSuite(t *testing.T) {
 	suite.Run(t, new(RepoTestSuite))
 }
