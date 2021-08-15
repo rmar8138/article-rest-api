@@ -1,6 +1,10 @@
 package service
 
-import "github.com/rmar8138/article-rest-api/internal/domain"
+import (
+	"github.com/pkg/errors"
+
+	"github.com/rmar8138/article-rest-api/internal/domain"
+)
 
 // ArticleRepository defines implementation of a repo to be passed into the service layer
 type ArticleRepository interface {
@@ -31,7 +35,12 @@ type CreateArticleInput struct {
 
 // Get retrieves a single article by its id
 func (as *ArticleService) Get(id string) (domain.Article, error) {
-	return domain.Article{}, nil
+	article, err := as.repo.Get(id)
+	if err != nil {
+		return domain.Article{}, errors.Wrapf(err, "unable to get article with id: %v", id)
+	}
+
+	return article, nil
 }
 
 // Create creates a new article
