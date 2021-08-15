@@ -44,5 +44,10 @@ func (as *ArticleService) Get(id string) (domain.Article, error) {
 
 // Create creates a new article
 func (as *ArticleService) Create(newArticle CreateArticleInput) error {
+	err := as.repo.Create(newArticle)
+	if err != nil {
+		return errors.Wrapf(err, "unable to create new article")
+	}
+
 	return nil
 }

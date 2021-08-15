@@ -70,5 +70,44 @@ func (ar *ArticleRepository) Get(id string) (domain.Article, error) {
 // Create creates a new article in a json file store by appending to the existing file if
 // article with given ID does not yet exist
 func (ar *ArticleRepository) Create(newArticle service.CreateArticleInput) error {
+	articles, err := ar.readArticles()
+	if err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "unable to read articles from json file")
+	}
+
+	if idAlreadyExists(articles, newArticle.ID) {
+		return internal.NewErrorf(internal.ErrorCodeInvalidArgument, "article already exists with ID: %v", newArticle.ID)
+	}
+	articles = append(articles, Article{
+		ID:    newArticle.ID,
+		Title: newArticle.Title,
+		Date:  newArticle.Date,
+		Body:  newArticle.Body,
+		Tags:  newArticle.Tags,
+	})
+
+	if err := saveArticles(ar.articlesFilepath, articles); err != nil {
+		return internal.WrapErrorf(err, internal.ErrorCodeUnknown, "unable to save article to json")
+	}
+
 	return nil
+}
+
+func idAlreadyExists(articles []Article, id string) bool {
+	for _, i := range articles {
+		if i.ID == id {
+			return true
+		}
+	}
+
+	return false
+}
+
+func saveArticles(filepath string, articles []Article) error {
+	b, err := json.Marshal(articles)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(filepath, b, 0644)
 }

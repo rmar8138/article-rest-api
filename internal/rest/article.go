@@ -1,10 +1,13 @@
 package rest
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator"
+	"github.com/rmar8138/article-rest-api/internal"
 	"github.com/rmar8138/article-rest-api/internal/service"
 )
 
@@ -24,6 +27,7 @@ func NewArticleHandler(svc *service.ArticleService) *ArticleHandler {
 func (ah *ArticleHandler) RegisterRoutes(r chi.Router) {
 	r.Route("/articles", func(r chi.Router) {
 		r.Get("/{id}", ah.get)
+		r.Post("/", ah.create)
 	})
 }
 
@@ -50,4 +54,42 @@ func (ah *ArticleHandler) get(w http.ResponseWriter, r *http.Request) {
 		Body:  article.Body,
 		Tags:  article.Tags,
 	})
+}
+
+// CreateArticleRequest represents the structure we intend to receive when a client
+// tries to create a new article
+type CreateArticleRequest struct {
+	ID    string   `json:"id" validate:"required"`
+	Title string   `json:"title" validate:"required"`
+	Date  string   `json:"date" validate:"required"`
+	Body  string   `json:"body" validate:"required"`
+	Tags  []string `json:"tags" validate:"required"`
+}
+
+func (ah *ArticleHandler) create(w http.ResponseWriter, r *http.Request) {
+	var newArticle CreateArticleRequest
+	err := json.NewDecoder(r.Body).Decode(&newArticle)
+	if err != nil {
+		handleErrorResponse(w, r, err)
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(newArticle)
+	if err != nil {
+		handleErrorResponse(w, r, internal.WrapErrorf(err, internal.ErrorCodeInvalidArgument, "missing values in request body"))
+		return
+	}
+
+	err = ah.svc.Create(service.CreateArticleInput{
+		ID:    newArticle.ID,
+		Title: newArticle.Title,
+		Date:  newArticle.Date,
+		Body:  newArticle.Body,
+		Tags:  newArticle.Tags,
+	})
+	if err != nil {
+		handleErrorResponse(w, r, err)
+		return
+	}
 }
