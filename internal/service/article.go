@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/pkg/errors"
-
 	"github.com/rmar8138/article-rest-api/internal/domain"
 )
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/pkg/errors"
+	"github.com/rmar8138/article-rest-api/internal"
 	"github.com/rmar8138/article-rest-api/internal/domain"
 	"github.com/rmar8138/article-rest-api/internal/service"
 )
@@ -49,7 +49,7 @@ func (ar *ArticleRepository) readArticles() ([]Article, error) {
 func (ar *ArticleRepository) Get(id string) (domain.Article, error) {
 	articles, err := ar.readArticles()
 	if err != nil {
-		return domain.Article{}, errors.Wrap(err, "unable to read articles from json file")
+		return domain.Article{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "unable to read articles from json file")
 	}
 
 	for _, a := range articles {
@@ -64,7 +64,7 @@ func (ar *ArticleRepository) Get(id string) (domain.Article, error) {
 		}
 	}
 
-	return domain.Article{}, errors.New("no article found with id: " + id)
+	return domain.Article{}, internal.NewErrorf(internal.ErrorCodeNotFound, "no article found with id: %v", id)
 }
 
 // Create creates a new article in a json file store by appending to the existing file if

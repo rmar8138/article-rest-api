@@ -39,7 +39,7 @@ type Article struct {
 func (ah *ArticleHandler) get(w http.ResponseWriter, r *http.Request) {
 	article, err := ah.svc.Get(chi.URLParam(r, "id"))
 	if err != nil {
-		handleErrorBadRequest(w, r, err)
+		handleErrorResponse(w, r, err)
 		return
 	}
 
