@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "title": "latest science shows that potato chips are better for you than sugar",
+    "date": "2016-09-22",
+    "body": "some text, potentially containing simple markup about how potato chips are great",
+    "tags": ["health", "fitness", "science"]
+  },
+  {
+    "id": "2",
+    "title": "exercise is apparently good for you",
+    "date": "2016-09-22",
+    "body": "you should probably exercise after reading this",
+    "tags": ["health", "fitness"]
+  },
+  {
+    "id": "3",
+    "title": "studies show that science is fake",
+    "date": "2016-10-03",
+    "body": "i wouldnt trust those studies",
+    "tags": ["science"]
+  }
+]
