@@ -111,3 +111,26 @@ func saveArticles(filepath string, articles []Article) error {
 
 	return ioutil.WriteFile(filepath, b, 0644)
 }
+
+// GetByDate retrieves all articles by a given date
+func (ar *ArticleRepository) GetByDate(date string) ([]domain.Article, error) {
+	allArticles, err := ar.readArticles()
+	if err != nil {
+		return []domain.Article{}, internal.WrapErrorf(err, internal.ErrorCodeUnknown, "unable to read articles from json file")
+	}
+
+	var matchingArticles []domain.Article
+	for _, a := range allArticles {
+		if a.Date == date {
+			matchingArticles = append(matchingArticles, domain.Article{
+				ID:    a.ID,
+				Title: a.Title,
+				Date:  a.Date,
+				Body:  a.Body,
+				Tags:  a.Tags,
+			})
+		}
+	}
+
+	return matchingArticles, nil
+}

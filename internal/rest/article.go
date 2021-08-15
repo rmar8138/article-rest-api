@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -29,6 +30,10 @@ func (ah *ArticleHandler) RegisterRoutes(r chi.Router) {
 	r.Route("/articles", func(r chi.Router) {
 		r.Get("/{id}", ah.get)
 		r.Post("/", ah.create)
+	})
+
+	r.Route("/tags", func(r chi.Router) {
+		r.Get("/{tagName}/{date}", ah.getArticlesByTagAndDate)
 	})
 }
 
@@ -104,4 +109,55 @@ func validDate(date string) bool {
 	dateRegex := `\d{4}-\d{2}-\d{2}`
 	match, _ := regexp.MatchString(dateRegex, date)
 	return match
+}
+
+// ArticlesByTagAndDateResponse represents the structure we intend to send to the client when they
+// request article ids by tag and date
+type ArticlesByTagAndDateResponse struct {
+	Tag         string   `json:"tag"`
+	Count       int      `json:"count"`
+	ArticleIDs  []string `json:"articles"`
+	RelatedTags []string `json:"related_tags"`
+}
+
+func (ah *ArticleHandler) getArticlesByTagAndDate(w http.ResponseWriter, r *http.Request) {
+	tagName := chi.URLParam(r, "tagName")
+	date := chi.URLParam(r, "date")
+
+	if !validUnhyphenatedDate(date) {
+		handleErrorResponse(w, r, internal.NewErrorf(internal.ErrorCodeInvalidArgument, "invalid date format"))
+		return
+	}
+
+	articles, err := ah.svc.GetArticlesByTagAndDate(tagName, toHyphenatedDate(date))
+	if err != nil {
+		handleErrorResponse(w, r, err)
+		return
+	}
+
+	render.JSON(w, r, ArticlesByTagAndDateResponse{
+		Tag:         articles.Tag,
+		Count:       articles.Count,
+		ArticleIDs:  articles.ArticleIDs,
+		RelatedTags: articles.RelatedTags,
+	})
+}
+
+func validUnhyphenatedDate(date string) bool {
+	return len(date) == 8
+}
+
+func toHyphenatedDate(date string) string {
+	var year, month, day string
+	for i, c := range date {
+		if i > 5 {
+			day += string(c)
+		} else if i > 3 {
+			month += string(c)
+		} else {
+			year += string(c)
+		}
+	}
+
+	return strings.Join([]string{year, month, day}, "-")
 }
