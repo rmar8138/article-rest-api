@@ -10,10 +10,15 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/rmar8138/article-rest-api/internal/localjson"
 	"github.com/rmar8138/article-rest-api/internal/rest"
+	"github.com/rmar8138/article-rest-api/internal/service"
 )
 
 const (
+	// FILEPATH is the filepath to the fake articles json file relative to root of repo
+	FILEPATH = "internal/localjson/data/articles.json"
+	// PORT is the default port for the api server
 	PORT = "8888"
 )
 
@@ -28,7 +33,9 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	articleHandler := rest.NewArticleHandler()
+	articleRepo := localjson.NewArticleRepository(FILEPATH)
+	articleService := service.NewArticleService(articleRepo)
+	articleHandler := rest.NewArticleHandler(articleService)
 	articleHandler.RegisterRoutes(r)
 
 	// setup graceful shutdown

@@ -5,11 +5,6 @@ import (
 	"github.com/rmar8138/article-rest-api/internal/service"
 )
 
-const (
-	// FILEPATH is the filepath to the fake articles json file relative to root of repo
-	FILEPATH = "internal/localjson/data/articles.json"
-)
-
 // ArticleRepository represents a local json file implementation of the data
 // persistence layer
 type ArticleRepository struct {

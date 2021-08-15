@@ -5,12 +5,17 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/rmar8138/article-rest-api/internal/service"
 )
 
-type ArticleHandler struct{}
+type ArticleHandler struct {
+	svc *service.ArticleService
+}
 
-func NewArticleHandler() *ArticleHandler {
-	return &ArticleHandler{}
+func NewArticleHandler(svc *service.ArticleService) *ArticleHandler {
+	return &ArticleHandler{
+		svc: svc,
+	}
 }
 
 func (ah *ArticleHandler) RegisterRoutes(r chi.Router) {
