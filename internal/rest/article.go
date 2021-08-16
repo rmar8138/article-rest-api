@@ -144,7 +144,9 @@ func (ah *ArticleHandler) getArticlesByTagAndDate(w http.ResponseWriter, r *http
 }
 
 func validUnhyphenatedDate(date string) bool {
-	return len(date) == 8
+	dateRegex := `^\d{8}$`
+	match, _ := regexp.MatchString(dateRegex, date)
+	return match
 }
 
 func toHyphenatedDate(date string) string {
